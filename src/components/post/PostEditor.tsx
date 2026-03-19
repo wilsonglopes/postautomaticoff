@@ -186,8 +186,8 @@ export function PostEditor({ postId: initialPostId }: PostEditorProps) {
           ordem: 0, urlSupabase: featuredPreview || '', urlWp: null,
           wpMediaId: null, altText: titulo, legenda: '', nomeArquivo: '', criadoEm: '',
         }] : []),
-        ...contentImages.filter(img => img.dbId).map((img, i) => ({
-          id: img.dbId!, postId: postId || '', tipo: img.tipo, ordem: i,
+        ...contentImages.map((img, i) => ({
+          id: img.dbId || img.localId, postId: postId || '', tipo: img.tipo, ordem: i,
           urlSupabase: img.preview || '', urlWp: null, wpMediaId: null,
           altText: img.altText, legenda: img.legenda, nomeArquivo: '',
           criadoEm: '',
