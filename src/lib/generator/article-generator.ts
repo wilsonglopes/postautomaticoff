@@ -70,16 +70,35 @@ function getIntroText(descricao: string, keyword: string, keywordVariacao: strin
 <p>O feltro é um material maravilhoso para o artesanato: fácil de cortar, disponível em centenas de cores e muito versátil. Com um pouco de criatividade e os moldes certos, qualquer pessoa consegue fazer peças incríveis em casa. Veja como criar o seu ${kvs || kw} agora mesmo!</p>`
 }
 
-function getPecaSection(titulo: string, keyword: string, descricao: string): string {
+function getPecaSection(titulo: string, keyword: string): string {
   const kw = escapeHtml(keyword)
-  return `<h2>Sobre a Peça: ${escapeHtml(titulo)}</h2>
-<p>Esta é uma das criações mais encantadoras que você vai encontrar no Feltro Fácil. O <strong>${kw}</strong> é uma peça que une delicadeza e criatividade, perfeita para presentear em datas especiais ou para incrementar a decoração do ambiente.</p>${descricao && descricao.trim().length > 30 ? `\n<p>${escapeHtml(descricao.trim())}</p>` : ''}`
+  return `<h2>Sobre a Peça: ${escapeHtml(titulo)}</h2>`
 }
 
-function getMoldeSection(keyword: string): string {
+function getPecaDescriptionText(keyword: string, descricao: string): string {
+  const kw = escapeHtml(keyword)
+  const desc = descricao && descricao.trim().length > 30
+    ? `<p>${escapeHtml(descricao.trim())}</p>`
+    : ''
+  return `<p>Esta é uma das criações mais encantadoras que você vai encontrar no Feltro Fácil. O <strong>${kw}</strong> é uma peça que une delicadeza e criatividade, perfeita para presentear em datas especiais ou para incrementar a decoração do ambiente.</p>${desc}`
+}
+
+const MOLD_TIPS = [
+  'Dica: numere as peças do molde com um lápis antes de recortar para facilitar a montagem e evitar confusões.',
+  'Atenção: ao transferir os moldes para o feltro, use um lápis de cor clara para não marcar o tecido permanentemente.',
+  'Dica de corte: use uma tesoura específica para tecido e corte sempre seguindo o contorno externo do molde.',
+  'Lembre-se de imprimir na escala 1:1 (sem redimensionar) para garantir que as peças fiquem no tamanho correto.',
+  'Dica de montagem: encaixe as peças secas antes de colar definitivamente para verificar o resultado final.',
+]
+
+function getMoldeIntroText(keyword: string): string {
   const kw = escapeHtml(keyword)
   return `<h2>Molde para ${kw.charAt(0).toUpperCase() + kw.slice(1)}</h2>
-<p>Confira abaixo os moldes para criar o seu <strong>${kw}</strong>. Para usar os moldes, imprima na escala 1:1 (sem redimensionar), transfira para o feltro com um lápis e corte com cuidado usando uma tesoura específica para tecido. Cada parte está numerada para facilitar a montagem.</p>`
+<p>Confira abaixo os moldes para criar o seu <strong>${kw}</strong>. Imprima na escala 1:1 (sem redimensionar), transfira para o feltro com um lápis e corte com cuidado usando tesoura específica para tecido. Cada parte está identificada para facilitar a montagem.</p>`
+}
+
+function getMoldTip(index: number): string {
+  return `<p>${MOLD_TIPS[index % MOLD_TIPS.length]}</p>`
 }
 
 function getMaterialsSection(execucao: string): string {
@@ -155,7 +174,7 @@ export function generateArticleHtml(post: Post): string {
 
   const blocks: string[] = []
 
-  // 1. Subtítulo criativo (H2 abre o post - o H1 é o título do WP)
+  // 1. Subtítulo criativo (H2 abre o post — o H1 é o título do WP)
   const subtitle = getCreativeSubtitle(titulo, keyword, tema)
   blocks.push(`<h2>${escapeHtml(subtitle)}</h2>`)
 
@@ -167,37 +186,53 @@ export function generateArticleHtml(post: Post): string {
     blocks.push(buildInternalLinkBlock(linksInternos.slice(0, 2)))
   }
 
-  // 4. Seção da peça
-  blocks.push(getPecaSection(titulo, keyword, descricao))
+  // 4. H2 "Sobre a Peça"
+  blocks.push(getPecaSection(titulo, keyword))
 
-  // 5. Imagens da peça
+  // 5. Primeira imagem da peça LOGO após o subtítulo
   if (pieceImages.length > 0) {
-    blocks.push(`<div class="wp-block-gallery feltro-gallery-pecas">`)
-    pieceImages.forEach(img => {
-      blocks.push(buildImageTag(img))
-    })
-    blocks.push(`</div>`)
+    blocks.push(buildImageTag(pieceImages[0]))
   }
 
-  // 6. Seção dos moldes
+  // 6. Texto descritivo da peça
+  blocks.push(getPecaDescriptionText(keyword, descricao))
+
+  // 7. Demais imagens da peça intercaladas com texto
+  const extraPieceTexts = [
+    `<p>Veja nos detalhes como esta peça é confeccionada com muito cuidado e carinho. Cada elemento é pensado para deixar o resultado final ainda mais especial e cheio de personalidade.</p>`,
+    `<p>O acabamento caprichado é o que faz toda a diferença em peças artesanais de feltro. Preste atenção nos detalhes e use cola quente com moderação para não manchar o feltro.</p>`,
+    `<p>Mais uma ângulo da peça finalizada. Inspire-se nestes detalhes para criar a sua versão com o toque especial que só o seu artesanato tem!</p>`,
+  ]
+  for (let i = 1; i < pieceImages.length; i++) {
+    blocks.push(extraPieceTexts[(i - 1) % extraPieceTexts.length])
+    blocks.push(buildImageTag(pieceImages[i]))
+  }
+
+  // 8. Seção dos moldes — cada molde separado por dica
   if (moldImages.length > 0) {
-    blocks.push(getMoldeSection(keyword))
-    moldImages.forEach(img => {
+    blocks.push(getMoldeIntroText(keyword))
+    moldImages.forEach((img, i) => {
       blocks.push(buildImageTag(img))
+      // Adiciona dica após cada molde, exceto se for o último
+      if (i < moldImages.length - 1) {
+        blocks.push(getMoldTip(i))
+      }
     })
+    // Texto de fechamento dos moldes
+    blocks.push(`<p>Todos os moldes acima estão na proporção correta. Após recortar todas as peças, organize-as sobre uma superfície plana antes de iniciar a colagem para planejar a montagem.</p>`)
   }
 
-  // 7. Materiais
+  // 9. Materiais
   blocks.push(getMaterialsSection(execucao))
 
-  // 8. Links externos (loja + Santa Fé)
+  // 10. Links externos (loja + Santa Fé)
   blocks.push(buildExternalLinksText(keyword))
 
-  // 9. Fechamento e links internos finais
+  // 11. Fechamento e links internos finais
   const closingLinks = linksInternos.length > 2 ? linksInternos.slice(2) : []
   blocks.push(getClosingSection(keyword, closingLinks, relatedUrl))
 
-  // 10. Créditos
+  // 12. Créditos
   const creditsBlock = getCreditsBlock(creditos, execucao)
   if (creditsBlock) blocks.push(creditsBlock)
 
