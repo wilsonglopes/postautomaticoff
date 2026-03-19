@@ -3,10 +3,6 @@ import { supabaseAdmin } from '@/lib/supabase/server'
 import { randomUUID } from 'crypto'
 import type { ApiResponse } from '@/types'
 
-export const config = {
-  api: { bodyParser: false },
-}
-
 // POST /api/upload
 // FormData: file (File), postId (string), tipo ('peca'|'molde'|'destaque'), ordem (number), altText (string), legenda (string)
 export async function POST(request: NextRequest) {
