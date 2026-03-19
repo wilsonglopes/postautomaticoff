@@ -98,6 +98,9 @@ export function PostEditor({ postId: initialPostId }: PostEditorProps) {
   const [newLinkUrl, setNewLinkUrl] = useState('')
   const [newLinkAnchor, setNewLinkAnchor] = useState('')
 
+  // AI generation
+  const [generatingAI, setGeneratingAI] = useState(false)
+
   // Publish
   const [publishStep, setPublishStep] = useState<PublishStep>('idle')
   const [publishMessage, setPublishMessage] = useState('')
@@ -388,6 +391,36 @@ export function PostEditor({ postId: initialPostId }: PostEditorProps) {
     setNewLinkAnchor('')
   }
 
+  // ─── AI generation ───────────────────────────────────────────
+  async function handleGenerateAI() {
+    if (!tema.trim()) {
+      toast.error('Preencha o campo "Tema do Título" para gerar com IA.')
+      return
+    }
+    setGeneratingAI(true)
+    try {
+      const res = await fetch('/api/ai/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tema, categoria }),
+      })
+      const { data, error } = await res.json()
+      if (error) throw new Error(error)
+      if (data.titulo) setTitulo(data.titulo)
+      if (data.keyword) setKeyword(data.keyword)
+      if (data.keywordVariacao) setKeywordVariacao(data.keywordVariacao)
+      if (data.descricao) setDescricao(data.descricao)
+      if (data.tags?.length) setTagsInput(data.tags.join(', '))
+      if (data.seoTitulo) setSeoTitulo(data.seoTitulo)
+      if (data.seoDescricao) setSeoDescricao(data.seoDescricao)
+      toast.success('Conteúdo gerado com IA!')
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Erro ao gerar com IA.')
+    } finally {
+      setGeneratingAI(false)
+    }
+  }
+
   // ─── Auto-suggestions ────────────────────────────────────────
   function handleAutoSlug() {
     setSlug(slugify(keyword || titulo))
@@ -519,6 +552,26 @@ export function PostEditor({ postId: initialPostId }: PostEditorProps) {
       <Card className="mb-6">
         <CardHeader title="Dados do Post" icon={<Info className="w-4 h-4" />} />
         <div className="space-y-4">
+          {/* AI Generate Banner */}
+          <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-xl">
+            <Wand2 className="w-5 h-5 text-purple-500 flex-shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-purple-800">Gerar com IA</p>
+              <p className="text-xs text-purple-600">Preencha o Tema e clique para gerar título, keywords, descrição, tags e SEO automaticamente.</p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleGenerateAI}
+              loading={generatingAI}
+              disabled={generatingAI || !tema.trim()}
+              className="border-purple-300 text-purple-700 hover:bg-purple-100 flex-shrink-0"
+            >
+              <Wand2 className="w-4 h-4" />
+              {generatingAI ? 'Gerando...' : 'Gerar com IA'}
+            </Button>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input label="Tema do Título" placeholder="ex: Boneca Bailarina" value={tema} onChange={e => setTema(e.target.value)} hint="Tema geral da peça" />
             <div>
