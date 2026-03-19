@@ -68,11 +68,12 @@ export async function PATCH(request: NextRequest, { params }: Params) {
   if (postBody.wpFeaturedMediaId !== undefined) updateData.wp_featured_media_id = postBody.wpFeaturedMediaId
   if (postBody.erroPublicacao !== undefined) updateData.erro_publicacao = postBody.erroPublicacao
 
-  const promises: Promise<unknown>[] = []
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const promises: Promise<any>[] = []
 
   if (Object.keys(updateData).length > 0) {
     promises.push(
-      supabaseAdmin.from('posts').update(updateData).eq('id', id)
+      supabaseAdmin.from('posts').update(updateData).eq('id', id).then()
     )
   }
 
