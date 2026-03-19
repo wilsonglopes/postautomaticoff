@@ -225,9 +225,12 @@ export function PostEditor({ postId: initialPostId }: PostEditorProps) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ titulo: titulo || 'Novo Post' }),
     })
-    const { data } = await res.json()
-    setPostId(data.id)
-    return data.id
+    const json = await res.json()
+    if (!res.ok || !json.data?.id) {
+      throw new Error(json.error || 'Erro ao criar post. Verifique as variáveis de ambiente no Netlify.')
+    }
+    setPostId(json.data.id)
+    return json.data.id
   }
 
   async function saveFormData(id: string, showToast = true) {
