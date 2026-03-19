@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply text-gray-900 bg-gray-50 antialiased;
+  }
+}
+
+/* WordPress article preview styles */
+.article-preview {
+  @apply max-w-2xl mx-auto text-gray-800 leading-relaxed;
+}
+
+.article-preview h1 {
+  @apply text-2xl font-bold text-gray-900 mb-4;
+}
+
+.article-preview h2 {
+  @apply text-xl font-bold text-gray-900 mt-8 mb-3;
+}
+
+.article-preview h3 {
+  @apply text-lg font-semibold text-gray-900 mt-6 mb-2;
+}
+
+.article-preview p {
+  @apply mb-4;
+}
+
+.article-preview ul,
+.article-preview ol {
+  @apply mb-4 pl-6;
+}
+
+.article-preview ul {
+  @apply list-disc;
+}
+
+.article-preview ol {
+  @apply list-decimal;
+}
+
+.article-preview li {
+  @apply mb-1;
+}
+
+.article-preview a {
+  @apply text-brand-600 underline underline-offset-2 hover:text-brand-700;
+}
+
+.article-preview figure {
+  @apply my-6;
+}
+
+.article-preview figure img {
+  @apply w-full rounded-xl shadow-sm;
+}
+
+.article-preview figcaption {
+  @apply text-sm text-gray-500 text-center mt-2;
+}
+
+.article-preview hr {
+  @apply my-8 border-gray-200;
+}
+
+.article-preview strong {
+  @apply font-semibold;
+}
+
+.article-preview .veja-tambem {
+  @apply bg-brand-50 border-l-4 border-brand-400 p-4 rounded-r-lg my-6;
+}
+
+.article-preview .feltro-gallery-pecas {
+  @apply grid gap-4;
+}
+
+.article-preview .creditos-post {
+  @apply text-sm text-gray-500 italic;
+}
