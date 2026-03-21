@@ -9,12 +9,14 @@ import {
   History,
   Settings,
   BookOpen,
+  Share2,
 } from 'lucide-react'
 
 const navItems = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
   { href: '/admin/novo-post', label: 'Novo Post', icon: PlusCircle },
   { href: '/admin/historico', label: 'Histórico', icon: History },
+  { href: '/admin/social', label: 'Social Media', icon: Share2 },
 ]
 
 export function Sidebar() {
