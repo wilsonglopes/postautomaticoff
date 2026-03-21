@@ -10,6 +10,7 @@ import {
   Settings,
   BookOpen,
   Share2,
+  Pin,
 } from 'lucide-react'
 
 const navItems = [
@@ -17,6 +18,7 @@ const navItems = [
   { href: '/admin/novo-post', label: 'Novo Post', icon: PlusCircle },
   { href: '/admin/historico', label: 'Histórico', icon: History },
   { href: '/admin/social', label: 'Social Media', icon: Share2 },
+  { href: '/admin/pinterest', label: 'Pinterest', icon: Pin },
 ]
 
 export function Sidebar() {
