@@ -27,6 +27,7 @@ export default function PinterestPage() {
   const [savingToken, setSavingToken] = useState(false)
   const [testingToken, setTestingToken] = useState(false)
   const [tokenUser, setTokenUser] = useState('')
+  const [oauthConnecting, setOauthConnecting] = useState(false)
 
   // ── Boards ─────────────────────────────────────────────────
   const [boards, setBoards] = useState<Board[]>([])
@@ -51,11 +52,23 @@ export default function PinterestPage() {
   const [submitting, setSubmitting] = useState(false)
   const [result, setResult] = useState<{ pinId: string; pinUrl: string } | null>(null)
 
-  // Check token on mount
+  // Check token on mount + handle OAuth callback params
   useEffect(() => {
     fetch('/api/pinterest/token')
       .then(r => r.json())
       .then(d => setTokenConfigured(d.configured))
+
+    // Verificar se voltou do OAuth
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('connected') === 'true') {
+      toast.success('Pinterest conectado com sucesso!')
+      setTokenConfigured(true)
+      window.history.replaceState({}, '', '/admin/pinterest')
+    }
+    if (params.get('error')) {
+      toast.error(`Erro ao conectar: ${params.get('error')}`)
+      window.history.replaceState({}, '', '/admin/pinterest')
+    }
   }, [])
 
   // Load boards when token is configured
@@ -194,9 +207,10 @@ export default function PinterestPage() {
           </div>
         </div>
 
-        {/* Token button */}
+        {/* OAuth connect button */}
         <button
-          onClick={() => setShowTokenModal(true)}
+          onClick={() => { setOauthConnecting(true); window.location.href = '/api/pinterest/auth' }}
+          disabled={oauthConnecting}
           className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
             tokenConfigured
               ? 'border-red-200 bg-red-50 text-red-700 hover:bg-red-100'
@@ -204,8 +218,8 @@ export default function PinterestPage() {
           }`}
         >
           <span className={`w-2 h-2 rounded-full ${tokenConfigured ? 'bg-red-500' : 'bg-gray-400'}`} />
-          <Settings className="w-3 h-3" />
-          Token Pinterest
+          <Pin className="w-3 h-3" />
+          {tokenConfigured ? 'Reconectar Pinterest' : 'Conectar Pinterest'}
         </button>
       </div>
 
@@ -213,15 +227,18 @@ export default function PinterestPage() {
       {!tokenConfigured && (
         <div className="flex items-start gap-3 p-4 rounded-xl bg-amber-50 border border-amber-200">
           <AlertCircle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
-          <div>
-            <p className="text-sm font-semibold text-amber-800">Token não configurado</p>
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-amber-800">Pinterest não conectado</p>
             <p className="text-xs text-amber-700 mt-0.5">
-              Configure o Access Token do Pinterest para criar pins. Gere um token em{' '}
-              <span className="font-medium">developers.pinterest.com</span> com os escopos{' '}
-              <code className="bg-amber-100 px-1 rounded">pins:write</code> e{' '}
-              <code className="bg-amber-100 px-1 rounded">boards:read</code>.
+              Clique em <strong>"Conectar Pinterest"</strong> no canto superior direito para autorizar o app via OAuth e obter permissão de criar pins.
             </p>
           </div>
+          <button
+            onClick={() => { setOauthConnecting(true); window.location.href = '/api/pinterest/auth' }}
+            className="flex-shrink-0 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-lg transition-colors"
+          >
+            Conectar agora
+          </button>
         </div>
       )}
 
